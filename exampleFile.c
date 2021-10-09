@@ -15,7 +15,11 @@ typedef struct node
 	struct node *right;
 } Node;
 
-void preorderTraversal(Node *ptr) //전위순회함수를 통해 값 있나 확인
+int SearchFunction(Node *ptr, int searchNum);
+
+int count = 0;
+
+void preorderTraversal(Node *ptr) //전위순회함수를 통해 트리 작동여부 확인
 {
 	if (ptr) //만약 ptr이 있다면 즉 Node가 있다면
 	{
@@ -28,6 +32,7 @@ void preorderTraversal(Node *ptr) //전위순회함수를 통해 값 있나 확인
 int main(void)
 {
 	int searchNum;
+
 	Node *rootNode = (Node *)malloc(sizeof(Node)); //동적할당으로 rootNode 만들어주고 키에 -10 (음수초기값으로 설정, 키값이 다 양수이므로 구분하기위해)
 	rootNode->key = -10;
 	rootNode->right = NULL;
@@ -99,7 +104,29 @@ int main(void)
 	printf("\n");
 	printf("검색을 원하는 키를 입력해주세요: ");
 	scanf("%d", &searchNum);
+	SearchFunction(rootNode, searchNum);
+
+	if (count == 0)
+	{
+		printf("찾으시는 키가 없습니다.\n");
+	}
 
 	fclose(pFile); //close file
 	return 0;
+}
+
+int SearchFunction(Node *ptr, int searchNum) //전위순회함수를 통해 해당 키 있나 확인
+{
+	if (ptr) //만약 ptr이 있다면 즉 Node가 있다면
+	{
+		if (ptr->key == searchNum)
+		{
+			count = 1;
+			printf("찾으시는 키가 있습니다.");
+			return 1;
+		}
+
+		SearchFunction(ptr->left, searchNum);  //Node의 left로 다시 재귀적 호출
+		SearchFunction(ptr->right, searchNum); //Node의 right로 다시 재귀적 호출
+	}
 }
