@@ -132,7 +132,7 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 		if (grandparent->right == NIL)
 		{
 			//printf("1");
-			RightRotate(&root, newNode);
+			RightRotate(&root, grandparent);
 			newNode->parent->color = BLACK;
 			newNode->parent->right->color = RED;
 		}
@@ -140,16 +140,20 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 		else if ((newNode = newNode->parent->left) && ((other != NIL) && (other->color == 0))) // Case 2-2
 		{
 			//printf("2");
-			RightRotate(&root, newNode);
-			newNode->parent->color = BLACK;
-			newNode->parent->left->color = RED;
+			RightRotate(&root, grandparent);
+			newNode->parent->color = 0;
+			grandparent->color = 1;
 		}
 
 		else if ((newNode = newNode->parent->right) && ((other != NIL) && (other->color == 0))) //Case 2-1
 		{
 			//printf("3");
-			LeftRotate(&root, newNode);
-			InspectNode(&root, newNode->left);
+			LeftRotate(&root, newNode->parent);
+			newNode = newNode->left;
+
+			RightRotate(&root, newNode);
+			newNode->color = 0;
+			newNode->right->color = 1;
 		}
 
 		else if (other->color == 1)
@@ -165,25 +169,26 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 		// other2 즉 사촌이 왼쪽인 경우
 		else if (grandparent->left == NIL)
 		{
-			LeftRotate(&root, newNode);
+			LeftRotate(&root, grandparent);
 			newNode->parent->color = BLACK;
 			newNode->parent->left->color = RED;
 		}
 
 		else if ((newNode = newNode->parent->left) && ((other2 != NIL) && (other2->color == 0))) // Case 2-2
 		{
-
-			//여기 고쳐야함
-			RightRotate(&root, newNode);
-			//newNode->color = BLACK;
-			//newNode->parent->parent->color = RED;
-			InspectNode(&root, grandparent->right);
+			LeftRotate(&root, grandparent);
+			newNode->parent->color = 0;
+			grandparent->color = 1;
 		}
 
 		else if ((newNode = newNode->parent->right) && ((other2 != NIL) && (other2->color == 0))) //Case 2-1
 		{
+			RightRotate(&root, newNode->parent);
+			newNode = newNode->right;
+
 			LeftRotate(&root, newNode);
-			InspectNode(&root, newNode->left);
+			newNode->color = 0;
+			newNode->right->color = 1;
 		}
 
 		else if (other2->color == 1) //other2의 color가 red
@@ -199,59 +204,59 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 void RightRotate(Node **rootNode, Node *newNode) // RightRotate 함수
 {
 	Node *root = (*rootNode);
-	Node *grandparent = newNode->parent->parent; //삽입된 노드의 부모의 부모를 grandparent로 설정해줍니다
-	Node *parent = newNode->parent;				 //삽입된 노드의 부모를 parent로 설정해줍니다
+	Node *childnode = newNode->left; //삽입된 노드의 왼쪽 자식을 childnode로 해줍니다
+	Node *pparent = newNode->parent; //삽입된 노드의 parent를 pparent로 해줍니다
 
-	if (parent->right != NULL) //만약 부모의 right에 노드가 있다면
+	if (childnode->right != NULL)
 	{
-		parent->right->parent = grandparent; //부모의 right의 부모가 grandparent를 가리키게 합니다
+		childnode->right->parent = newNode;
 	}
 
-	grandparent->left = parent->right;	  //grandparent의 left가 parent의 right를 가리키게 합니다
-	grandparent->parent = parent;		  //grandparent의 부모가 parent를 가리키게 합니다
-	parent->right = grandparent;		  //parent의 right가 grandparent를 가리키게 합니다
-	parent->parent = grandparent->parent; //parent의 parent가 grandparent의 parent를 가리키게 합니다
+	newNode->left = childnode->right;
+	newNode->parent = childnode;
+	childnode->right = newNode;
+	childnode->parent = pparent;
 
-	if (grandparent->parent == NULL) //만약 grandparent의 parent가 NULL일 경우 즉 맨위일경우
+	if (pparent == NULL)
 	{
-		*rootNode = parent; //rootNode를 parent로 설정해줍니다
+		*rootNode = childnode;
 	}
-	else if (grandparent == grandparent->parent->left) //만약 grandparent가 더 위의 노드 기준 왼쪽에 위치하고 있었다면
+	else if (newNode == pparent->left)
 	{
-		grandparent->parent->left = parent; //grandparent의 left가 parent를 가리키게 합니다
+		pparent->left = childnode;
 	}
-	else //만약 grandparent가 더 위의 노드 기준 오른쪽에 위치하고 있었다면
+	else
 	{
-		grandparent->parent->right = parent; //grandparent의 right가 parent를 가리키게 합니다
+		pparent->right = childnode;
 	}
 }
 
 void LeftRotate(Node **rootNode, Node *newNode) //LeftRotate 함수
 {
 	Node *root = (*rootNode);
-	Node *grandparent = newNode->parent->parent; //삽입된 노드의 부모의 부모를 grandparent로 설정해줍니다
-	Node *parent = newNode->parent;
+	Node *childnode = newNode->right;
+	Node *pparent = newNode->parent;
 
-	if (parent->left != NULL)
+	if (childnode->left != NULL)
 	{
-		parent->left->parent = grandparent;
+		childnode->left->parent = newNode;
 	}
 
-	grandparent->right = parent->left;
-	grandparent->parent = parent;
-	parent->left = grandparent;
-	parent->parent = grandparent->parent;
+	newNode->right = childnode->left;
+	newNode->parent = childnode;
+	childnode->left = newNode;
+	childnode->parent = pparent;
 
-	if (grandparent->parent == NULL)
+	if (pparent == NULL)
 	{
-		*rootNode = parent;
+		*rootNode = childnode;
 	}
-	else if (grandparent == grandparent->parent->left)
+	else if (newNode == pparent->left)
 	{
-		grandparent->parent->left = parent;
+		pparent->left = childnode;
 	}
 	else
 	{
-		grandparent->parent->right = parent;
+		pparent->right = childnode;
 	}
 }
