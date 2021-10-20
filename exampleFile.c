@@ -2,9 +2,12 @@
 #include <stdlib.h> //동적할당, malloc 사용하기 위해 추가
 #include <time.h>
 
+#define STACK_SIZE 100000
 #define RED 1;	 //RED 1으로 정의
 #define BLACK 0; //BLACk 0으로 정의
 
+int top = -1;
+int count = 0;
 typedef struct node //Node 구조체 정의
 {
 	int key;			 //int형 key
@@ -16,13 +19,21 @@ typedef struct node //Node 구조체 정의
 
 static Node *NIL; //Red Black Tree의 마지막에 리프노드는 NIL이라고 일반적인 리프노드와 다른 리프노드를 가르키는데 이때 사용하기위해 선언
 
+Node *stack[STACK_SIZE];
+Node *pop(); //pop하는 함수
+void push(Node *ptr);
+
+int SearchFunction2(Node *ptr, int searchNum);
 void InsertNode(Node **, Node *);  //노드 삽입하는 함수
 void InspectNode(Node **, Node *); //트리 검사하는 함수
 void LeftRotate(Node **, Node *);  //왼쪽으로 회전하는 함수
 void RightRotate(Node **, Node *); //오른쪽으로 회전하는 함수
+void SearchRBTNode(Node **, int);
 
 int main(void)
 {
+	int searchNum;
+
 	Node *rootNode = (Node *)malloc(sizeof(Node)); //루트노드 동적할당 해주고 키 값 설정 및 링크 , 색 설정
 	rootNode->key = -10;						   //루트노드 초기 키는 -10으로 설정 (test파일은 양수부터 시작)
 	rootNode->right = NIL;						   //루트의 왼쪽 오른쪽 자식 NIL로 설정
@@ -74,6 +85,21 @@ int main(void)
 								// 생성된 트리에서 키 검색
 	}
 
+	printf("\n");
+	printf("검색을 원하는 키를 입력해주세요: ");
+	scanf("%d", &searchNum);
+
+	//SearchFunction2(rootNode, searchNum);
+	SearchRBTNode(&rootNode, searchNum);
+
+	clock_t timecheck = clock();
+	if (count == 0)
+	{
+		printf("찾으시는 키가 없습니다.\n");
+	}
+
+	clock_t timecheck2 = clock();
+	printf("%lf", (double)(timecheck2 - timecheck) / CLOCKS_PER_SEC) * 100;
 	//파일 형태로 반환
 	fclose(pFile); //close file
 	return 0;
@@ -107,6 +133,41 @@ void InsertNode(Node **rootNode, Node *newNode) //노드를 삽입하는 함수, 기본적으
 		{
 			InsertNode(&(root->left), newNode); //root->left와 newNode로 InsertNode 함수를 다시 호출합니다
 		}
+	}
+}
+
+void SearchRBTNode(Node **rootNode, int searchNum) //노드를 삽입하는 함수, 기본적으로 이진트리 삽입과 같습니다
+{
+	Node *root = (*rootNode); //root = rootNode
+
+	if (root->key < searchNum) //만약 새로들어온 키가 루트의 키보다 클 경우
+	{
+		if (root->right == NIL)
+		{
+			printf("찾는 숫자가 트리에 없습니다.\n");
+		}
+		else
+		{
+			SearchRBTNode(&(root->right), searchNum); //root->right 와 newNode로 InsertNode 함수를 다시 호출합니다
+		}
+	}
+
+	else if (root->key > searchNum) //만약 새로들어온 키가 루트의 키보다 작을 경우
+	{
+		if (root->left == NIL)
+		{
+			printf("찾는 숫자가 트리에 없습니다.\n");
+		}
+		else
+		{
+			SearchRBTNode(&(root->left), searchNum); //root->left와 newNode로 InsertNode 함수를 다시 호출합니다
+		}
+	}
+
+	else if (root->key == searchNum)
+	{
+		count++;
+		printf("찾는 숫자가 트리에 있습니다.\n");
 	}
 }
 
@@ -278,5 +339,52 @@ void LeftRotate(Node **rootNode, Node *newNode) //LeftRotate 함수
 	else //만약 회전 중심노드가 부모의 오른쪽 자식이었을 경우
 	{
 		pparent->right = childnode; //부모의 오른쪽 자식이 회전중심노드의 자식을 가리키게 합니다
+	}
+}
+
+int SearchFunction2(Node *ptr, int searchNum)
+{
+	int top = -1;
+	//스택 max사이즈
+	for (;;)
+	{
+		for (ptr; ptr->left != NIL; ptr = ptr->left)
+			push(ptr); //node를 push한다
+
+		ptr = pop(); //node를 pop한다
+
+		if (!ptr)  //만약 node가 없다면
+			break; //반복문 탈출
+
+		if (ptr->key == searchNum)
+		{
+			count = 1;
+			printf("찾으시는 키가 있습니다.");
+			return 1;
+		}
+		ptr = ptr->right; //node는 node->right가 된다
+	}
+}
+
+Node *pop() //pop하는 함수
+{
+	if (top == -1)
+	{ //top 이 -1인경우 스택이 비어있으니 pop할게 없다
+		//printf("stack is empty\n");
+		return NULL; //return NULL
+	}
+	return stack[top--]; //비어있지 않으면 stack[top--]을 return 해준다
+}
+
+void push(Node *aNode) //push하는 함수
+{
+	if (top >= STACK_SIZE - 1)
+	{							   //top >= MAX_STACK_SIZE - 1 ,즉 스택의 크기보다 크면(다 차있으면)
+		printf("stack is full\n"); //가득차있다고 알려줌
+	}
+
+	else
+	{						  //아닐 경우
+		stack[++top] = aNode; //stack[++top]에 노드를 넣어준다
 	}
 }
