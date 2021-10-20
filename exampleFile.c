@@ -5,7 +5,7 @@
 #define RED 1;	 //RED 1으로 정의
 #define BLACK 0; //BLACk 0으로 정의
 
-typedef struct node
+typedef struct node  //
 {
 	int key;
 	struct node *left;
@@ -32,7 +32,7 @@ int main(void)
 	NIL = (Node *)malloc(sizeof(Node)); //NIL 동적할당해주고 color BLACK으로 선언, RBT의 마지막 리프노드
 	NIL->color = BLACK;
 
-	FILE *pFile = fopen("test.txt", "r"); //read mode
+	FILE *pFile = fopen("test2.txt", "r"); //read mode
 	int intTemp = -1;
 
 	if (pFile == NULL)
@@ -133,7 +133,6 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 
 		if ((grandparent->right == NIL) && (newNode == newNode->parent->left))
 		{
-			//printf("1+");
 			newNode->parent->color = 0;
 			grandparent->color = 1;
 			RightRotate(&root, grandparent);
@@ -141,7 +140,6 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 
 		else if ((grandparent->right == NIL) && (newNode == newNode->parent->right))
 		{
-			//printf("2+");
 			LeftRotate(&root, newNode->parent);
 			newNode = newNode->left;
 			InspectNode(&root, newNode);
@@ -150,7 +148,6 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 		else if ((newNode == newNode->parent->left) && ((other != NIL) && (other->color == 0)))
 		//other가 할아버지 기준 오른쪽에 있고 새로운 노드가 부모의 왼쪽 자식인 경우, 강의자료 Case 2-1
 		{
-			//printf("3+");
 			newNode->parent->color = 0;
 			grandparent->color = 1;
 			RightRotate(&root, grandparent);
@@ -159,7 +156,6 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 		else if ((newNode = newNode->parent->right) && ((other != NIL) && (other->color == 0)))
 		//other가 할아버지 기준 오른쪽에 있고 새로운 노드가 부모의 오른쪽 자식인 경우 강의자료 Case 2-2
 		{
-			//printf("4+");
 			LeftRotate(&root, newNode->parent);
 			newNode = newNode->left;
 			InspectNode(&root, newNode);
@@ -167,7 +163,6 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 
 		else if ((other->color == 1) && (newNode->parent == grandparent->left))
 		{
-			//printf("5+");
 			newNode->parent->color = 0;
 			other->color = 0;
 			grandparent->color = 1;
@@ -177,41 +172,35 @@ void InspectNode(Node **rootNode, Node *newNode) //노드를 검사하는 함수
 		//printf("5");
 		// other2 즉 사촌이 왼쪽인 경우
 
-		else if ((grandparent->left == NIL) && (newNode == newNode->parent->left))
+		else if ((grandparent->left == NIL) && (newNode == newNode->parent->right))
 		{
-			//printf("6+");
 			newNode->parent->color = 0;
 			grandparent->color = 1;
 			LeftRotate(&root, grandparent);
 		}
 
-		else if ((grandparent->left == NIL) && (newNode == newNode->parent->right))
+		else if ((grandparent->left == NIL) && (newNode == newNode->parent->left))
 		{
-			//printf("7+");
 			RightRotate(&root, newNode->parent);
 			newNode = newNode->right;
 			InspectNode(&root, newNode);
-		}
-
-		else if ((newNode == newNode->parent->left) && ((other2 != NIL) && (other2->color == 0))) // Case 2-2
-		{
-			//printf("8+");
-			newNode->parent->color = 0;
-			grandparent->color = 1;
-			LeftRotate(&root, grandparent);
 		}
 
 		else if ((newNode == newNode->parent->right) && ((other2 != NIL) && (other2->color == 0))) //Case 2-1
 		{
-			//printf("9+");
+			newNode->parent->color = 0;
+			grandparent->color = 1;
+			LeftRotate(&root, grandparent);
+		}
+
+		else if ((newNode == newNode->parent->left) && ((other2 != NIL) && (other2->color == 0))) // Case 2-2
+		{
 			RightRotate(&root, newNode->parent);
 			newNode = newNode->right;
 			InspectNode(&root, newNode);
 		}
-
 		else if ((other2->color == 1) && (newNode->parent == grandparent->right)) //other2의 color가 red
 		{
-			//printf("10+");
 			newNode->parent->color = 0;
 			other2->color = 0;
 			grandparent->color = 1;
