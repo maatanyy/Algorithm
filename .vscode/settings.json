@@ -4,6 +4,7 @@
         "ostream": "cpp",
         "iterator": "c",
         "xutility": "c",
-        "utility": "c"
+        "utility": "c",
+        "xiosbase": "c"
     }
 }
